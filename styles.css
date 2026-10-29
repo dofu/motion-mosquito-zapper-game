@@ -20,6 +20,7 @@ video{display:none}
     radial-gradient(circle at 50% 30%, #1B2340 0%, var(--ink) 70%);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:24px;color:var(--paper);
+  overflow-y:auto;justify-content:safe center;   /* scrolls instead of clipping on short screens */
 }
 #overlay h1{
   font-family:'Press Start 2P',monospace;
@@ -328,3 +329,6 @@ video{display:none}
 @media (prefers-reduced-motion: reduce){
   #pmTitle,#pmPlaque,#pmInfo,#pmBtns{animation:none}
 }
+
+/* result and menu panels stay inside short screens and scroll if they must */
+#lvPanel,#tuPanel,#pmPanel{max-height:100vh;max-height:100dvh;overflow-y:auto}
