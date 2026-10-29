@@ -292,6 +292,50 @@
   @media (prefers-reduced-motion: reduce){
     #tuTitle,#tuPlaque,#tuKills,#tuBest,#tuBtns{animation:none}
   }
+
+  /* ---------- pause menu ---------- */
+  #pauseBtn{position:absolute;right:16px;bottom:16px;width:clamp(44px,6vw,56px);height:clamp(44px,6vw,56px);
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    background:rgba(11,14,26,.86);border:3px solid var(--frame);border-radius:14px;
+    box-shadow:0 0 18px rgba(80,140,255,.3);cursor:pointer;pointer-events:auto;
+    transition:border-color .15s, transform .07s}
+  #pauseBtn i{display:block;width:6px;height:40%;background:var(--volt);border-radius:2px}
+  #pauseBtn:hover{border-color:var(--volt)}
+  #pauseBtn:active{transform:translateY(2px)}
+  #pauseBtn:focus-visible{outline:3px dashed var(--volt);outline-offset:4px}
+  #pauseMenu{position:fixed;inset:0;z-index:22;display:none;
+    align-items:center;justify-content:center;overflow:hidden;
+    background:radial-gradient(circle at 50% 30%, #1B2340 0%, var(--ink) 70%)}
+  #pauseMenu.show{display:flex;animation:lvIn .25s ease-out both}
+  #pmPanel{position:relative;display:flex;flex-direction:column;
+    align-items:center;padding:20px;text-align:center}
+  #pmTitle{font-family:'Press Start 2P',monospace;
+    font-size:clamp(20px,5vw,44px);color:var(--volt);
+    text-shadow:3px 3px 0 #0A1740, 0 0 26px rgba(61,245,255,.85);
+    margin-bottom:clamp(16px,3vh,28px);
+    animation:punch .4s cubic-bezier(.2,2.2,.4,1) both}
+  #pmPlaque{background:rgba(20,28,54,.85);
+    border:3px solid var(--volt);border-radius:16px;
+    box-shadow:0 0 28px rgba(61,245,255,.35), inset 0 0 26px rgba(61,245,255,.08);
+    padding:clamp(14px,2.6vh,22px) clamp(24px,6vw,60px);
+    animation:punch .4s .08s cubic-bezier(.2,2.2,.4,1) both}
+  #pmPlaque .txt{font-family:'Press Start 2P',monospace;
+    font-size:clamp(24px,6vw,48px);color:var(--gold);
+    text-shadow:3px 3px 0 #8A3B00, 0 0 22px rgba(255,168,40,.85);white-space:nowrap}
+  #pmLbl{font-family:'Press Start 2P',monospace;
+    font-size:clamp(9px,1.5vw,13px);color:#7FE9F2;letter-spacing:2px;margin-bottom:10px}
+  #pmInfo{font-family:'Press Start 2P',monospace;
+    margin-top:clamp(14px,2.6vh,22px);font-size:clamp(10px,2.2vw,17px);
+    color:var(--paper);text-shadow:0 0 14px rgba(61,245,255,.7);
+    animation:punch .4s .16s cubic-bezier(.2,2.2,.4,1) both}
+  #pmBtns{display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(12px,3vw,24px);
+    margin-top:clamp(20px,3.6vh,34px);
+    animation:punch .4s .24s cubic-bezier(.2,2.2,.4,1) both}
+  #pmHint{font-family:'Press Start 2P',monospace;margin-top:clamp(14px,2.6vh,22px);
+    font-size:clamp(8px,1.3vw,11px);color:#5D6A8C;letter-spacing:1px}
+  @media (prefers-reduced-motion: reduce){
+    #pmTitle,#pmPlaque,#pmInfo,#pmBtns{animation:none}
+  }
 </style>
 </head>
 <body>
@@ -343,6 +387,7 @@
     </div>
   </div>
   <div id="handHint" class="px">SHOW YOUR HAND<br>TO GRAB THE RACQUET 🖐</div>
+  <button id="pauseBtn" aria-label="Pause (Esc)"><i></i><i></i></button>
 </div>
 
 <div id="levelUp">
@@ -395,6 +440,21 @@
       <button id="tuMenu" class="lvBtn">MENU</button>
       <button id="tuAgain" class="lvBtn primary">RETRY</button>
     </div>
+  </div>
+</div>
+
+<div id="pauseMenu" role="dialog" aria-modal="true" aria-label="Paused">
+  <div class="lvDotsBg"></div>
+  <div id="pmPanel">
+    <div id="pmTitle">PAUSED</div>
+    <div id="pmPlaque"><div id="pmLbl">SCORE</div><div class="txt" id="pmScore">0</div></div>
+    <div id="pmInfo"></div>
+    <div id="pmBtns">
+      <button id="pmMenu" class="lvBtn">MENU</button>
+      <button id="pmRestart" class="lvBtn">RESTART</button>
+      <button id="pmResume" class="lvBtn primary">RESUME</button>
+    </div>
+    <div id="pmHint">ESC TO RESUME</div>
   </div>
 </div>
 
@@ -549,6 +609,7 @@ function paintBests(){
 }
 
 let mosquitoes=[], sparks=[], floaters=[], corpses=[];
+let userPaused=false;   // true while the pause menu is open
 let levelPaused=false;  // true while the level-up screen is waiting on the player
 let waveT=0;            // >0 while the next wave holds off after a level-up
 let MODE='levels';      // 'levels' or 'time'
@@ -859,6 +920,7 @@ let lastT=performance.now();
 function loop(){
   if(!running) return;
   requestAnimationFrame(loop);
+  if(userPaused){ lastT=performance.now(); return; }   // frozen while the pause menu is open
   const now=performance.now();
   const dt=Math.min(0.05,(now-lastT)/1000);
   lastT=now;
@@ -1397,8 +1459,10 @@ $('tuAgain').addEventListener('click',()=>{
   timeUpEl.classList.remove('show');
   resetRound();
 });
-$('tuMenu').addEventListener('click',()=>{
+function goToMenu(){
   timeUpEl.classList.remove('show');
+  $('pauseMenu').classList.remove('show');
+  userPaused=false;
   hud.style.display='none';
   running=false;
   if(video.srcObject){ video.srcObject.getTracks().forEach(t=>t.stop()); video.srcObject=null; }
@@ -1407,7 +1471,45 @@ $('tuMenu').addEventListener('click',()=>{
   b.innerHTML='<span>LET\'S ZAP</span><span class="arrow">\u25b6</span>';
   paintBests();
   overlay.style.display='flex';
+}
+$('tuMenu').addEventListener('click',goToMenu);
+
+/* ================= PAUSE MENU ================= */
+const pauseEl=$('pauseMenu');
+function pauseGame(){
+  if(!running||userPaused||levelPaused||timeOver) return;
+  userPaused=true;
+  $('pmScore').textContent=score;
+  $('pmInfo').textContent = MODE==='time'
+    ? Math.ceil(timeLeft)+' SECONDS LEFT'
+    : 'LEVEL '+level+'  ·  '+kills+' / '+KILLS_PER_LEVEL+' ZAPPED';
+  pauseEl.classList.remove('show');
+  void pauseEl.offsetWidth;
+  pauseEl.classList.add('show');
+  if(AC&&buzzGain) buzzGain.gain.setTargetAtTime(0,AC.currentTime,0.05);
+  $('pmResume').focus();
+}
+function resumeGame(){
+  if(!userPaused) return;
+  userPaused=false;
+  pauseEl.classList.remove('show');
+  lastT=performance.now();
+}
+function togglePause(){ userPaused ? resumeGame() : pauseGame(); }
+$('pauseBtn').addEventListener('click',pauseGame);
+$('pmResume').addEventListener('click',resumeGame);
+$('pmRestart').addEventListener('click',()=>{ resetRound(); resumeGame(); });
+$('pmMenu').addEventListener('click',goToMenu);
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'||e.key==='p'||e.key==='P'){
+    if(e.repeat) return;
+    if(!running) return;
+    e.preventDefault();
+    togglePause();
+  }
 });
+// leaving the tab freezes the round so a timer never runs out unseen
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) pauseGame(); });
 
 let flashT=0;
 let DEBUG=false;

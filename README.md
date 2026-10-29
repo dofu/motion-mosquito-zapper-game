@@ -20,6 +20,8 @@ Your best score, kills and chain for each mode are saved in your browser.
 3. Touch a mosquito with the racquet head to zap it. Kills within a second of each other build a combo, with a callout from 3 up and a bigger one from 8.
 4. Golden mosquitoes are faster and worth 5x. Smaller mosquitoes pay a bonus because they are harder to spot.
 
+Press **Esc** or **P**, or tap the pause button at the bottom right, to pause. The pause menu lets you resume, restart the round or go back to the menu. Switching to another tab pauses too, so a timer never runs out unseen.
+
 Turn the sound on. Press **D** during play to show a calibration overlay of the pinch and the racquet axis.
 
 ## How it works
@@ -44,6 +46,7 @@ Then open the address it prints.
 
 - Served on `localhost`, the page starts and runs without errors in both modes.
 - With the hand tracker replaced by a scripted hand sweeping the screen, mosquitoes are zapped, the score and combo count, level 2 unlocks, the 30 second round ends on the results screen and the bests are saved.
+- The pause menu opens with Esc, P and the button, freezes the score and the clock, and resume, restart and menu all work, on a wide and a phone-sized screen.
 - Not yet tested: tracking a real hand, other browsers than Chromium, and phones.
 
 ## Known limits
