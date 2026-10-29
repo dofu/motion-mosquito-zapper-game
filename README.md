@@ -46,6 +46,15 @@ npx serve .
 
 Then open the address it prints.
 
+## Tests
+
+`tests/smoke.mjs` runs the game in headless Chromium with a fake camera and a scripted hand in place of the tracker. It checks that the game starts and zaps, that the pause menu opens and freezes the score, that resume, restart and menu work, and that a 30 second round ends on the results screen with the best saved. It takes about a minute.
+
+```
+npm i --no-save playwright && npx playwright install chromium
+node tests/smoke.mjs
+```
+
 ## Checked so far
 
 - Served on `localhost`, the page starts and runs without errors in both modes.
