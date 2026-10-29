@@ -26,7 +26,11 @@ Turn the sound on. Press **D** during play to show a calibration overlay of the 
 
 ## How it works
 
-- One file, `index.html`. No build step and nothing to install.
+- Five files and no build step: `index.html` (the markup), `styles.css`, and three ordinary scripts, loaded in this order.
+  - `audio.js`: every sound effect, generated with the Web Audio API.
+  - `game.js`: difficulty, scoring, drawing, hand tracking and the main loop.
+  - `screens.js`: mode select, pause, level up, time up and the start button.
+- The scripts are plain scripts, not modules, so `index.html` also opens by double-click. The tracking library is loaded when you press start.
 - Hand tracking uses [MediaPipe Tasks Vision](https://developers.google.com/mediapipe/solutions/vision/hand_landmarker) in the browser. The video stays on your device and nothing is uploaded.
 - The tracking library comes from jsDelivr, the hand model from Google's model storage and the fonts from Google Fonts, so the game needs a network connection to start.
 - Sound is generated with the Web Audio API. There are no audio files.
