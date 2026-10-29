@@ -71,6 +71,8 @@ const read = (page) => page.evaluate(() => ({
 // ---- Levels mode, pause menu ----
 {
   const { ctx, page, problems } = await open();
+  const title = await page.evaluate(() => ({ tab: document.title, h1: document.querySelector("#overlay h1").innerText.replace(/\s+/g, " ") }));
+  check("start screen: the title says Motion Mosquito Zapper", title.h1 === "MOTION MOSQUITO ZAPPER" && title.tab.startsWith("Motion Mosquito Zapper"), title.h1);
   await page.click("#startBtn");
   await page.waitForFunction(() => Number(document.getElementById("scoreVal").textContent) > 0, null, { timeout: 40000 });
   check("levels: starts and the scripted hand zaps a mosquito", true);
